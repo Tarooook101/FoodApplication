@@ -1,0 +1,314 @@
+﻿@model FoodApplication.BLL.Models.CreateOrderDTO
+
+@{
+    ViewData["Title"] = "Create Order";
+    Layout = "~/Views/Layout/_Layout.cshtml";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+
+<style>
+    :root {
+        --primary-color: #3498db;
+        --secondary-color: #2c3e50;
+        --accent-color: #e74c3c;
+        --background-color: #f8f9fa;
+        --text-color: #333;
+    }
+
+    body {
+        background-color: var(--background-color);
+        color: var(--text-color);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .card {
+        border: none;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+        .card:hover {
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+    .card-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        border-bottom: none;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    }
+
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
+
+    .order-item {
+        background-color: #fff;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+        border: 1px solid #e9ecef;
+    }
+
+        .order-item:hover {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+    #totalAmount {
+        font-weight: bold;
+        font-size: 1.4em;
+        color: var(--accent-color);
+    }
+
+    .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice {
+        background-color: var(--primary-color);
+        border: none;
+        color: white;
+    }
+</style>
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+
+                <div class="container mt-5">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-10">
+                            <div class="card shadow-lg border-0 rounded-lg">
+                                <div class="card-header">
+                                    <h3 class="text-center font-weight-light my-2">Create New Order</h3>
+                                </div>
+                                <div class="card-body">
+                                    <form asp-action="Create" method="post" id="createOrderForm">
+                                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                                        <div class="row mb-4">
+                                            <div class="col-md-6">
+                                                <div class="form-floating mb-3">
+                                                    <input asp-for="OrderDate" class="form-control" type="datetime-local" id="orderDate" />
+                                                    <label asp-for="OrderDate">Order Date</label>
+                                                    <span asp-validation-for="OrderDate" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-floating mb-3">
+                                                    <select asp-for="Status" asp-items="Html.GetEnumSelectList<FoodApplication.DAL.Entities.OrderStatus>()" class="form-select" id="orderStatus"></select>
+                                                    <label asp-for="Status">Status</label>
+                                                    <span asp-validation-for="Status" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-4">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="categoryFilter" class="form-label">Categories</label>
+                                                    <select id="categoryFilter" class="form-select" multiple data-placeholder="Select categories">
+                                                        @foreach (var category in ViewBag.Categories)
+                                                        {
+                                                            <option value="@category.Id">@category.Name</option>
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="ingredientFilter" class="form-label">Ingredients</label>
+                                                    <select id="ingredientFilter" class="form-select" multiple data-placeholder="Select ingredients">
+                                                        @foreach (var ingredient in ViewBag.Ingredients)
+                                                        {
+                                                            <option value="@ingredient.Id">@ingredient.Name</option>
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="card mb-4">
+                                            <div class="card-header bg-gradient-secondary text-white">
+                                                <h5 class="mb-0">Order Items</h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div id="orderItems">
+                                                    <!-- Order items will be dynamically added here -->
+                                                </div>
+                                                <button type="button" id="addOrderItem" class="btn btn-outline-primary mt-3">
+                                                    <i class="fas fa-plus me-2"></i>Add Order Item
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-4">
+                                            <div class="col-md-6 offset-md-6">
+                                                <div class="bg-light p-3 rounded">
+                                                    <h4 class="mb-0">Total Amount: <span id="totalAmount">$0.00</span></h4>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between mt-4">
+                                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                                <i class="fas fa-arrow-left me-2"></i>Back to List
+                                            </a>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-check me-2"></i>Create Order
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+       $(document).ready(function () {
+    const recipes = @Html.Raw(Json.Serialize(ViewBag.Recipes));
+    let orderItemIndex = 0;
+
+    function initializeSelect2() {
+        $('#categoryFilter, #ingredientFilter').select2({
+            theme: 'bootstrap4',
+            width: '100%'
+        });
+    }
+
+    function addOrderItem() {
+        const orderItemHtml = `
+            <div class="order-item mb-3 p-3">
+                <div class="row align-items-center">
+                    <div class="col-md-5 mb-2 mb-md-0">
+                        <select name="OrderItems[${orderItemIndex}].RecipeId" class="form-select recipe-select" required>
+                            <option value="">Select a recipe</option>
+                            ${recipes.map(r => `<option value="${r.id}" data-price="${r.price}">${r.name}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-2 mb-md-0">
+                        <input type="number" name="OrderItems[${orderItemIndex}].Quantity" class="form-control quantity-input" placeholder="Quantity" required min="1" value="1" />
+                    </div>
+                    <div class="col-md-3 mb-2 mb-md-0">
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" name="OrderItems[${orderItemIndex}].Price" class="form-control price-input" placeholder="Price" required min="0.01" step="0.01" readonly />
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-outline-danger remove-item">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        $('#orderItems').append(orderItemHtml);
+        orderItemIndex++;
+        updateTotalAmount();
+    }
+
+    function updateTotalAmount() {
+        let total = 0;
+        $('.order-item').each(function () {
+            const quantity = parseFloat($(this).find('.quantity-input').val()) || 0;
+            const price = parseFloat($(this).find('.price-input').val()) || 0;
+            total += quantity * price;
+        });
+        $('#totalAmount').text('$' + total.toFixed(2));
+    }
+
+    // New function to handle recipe selection
+    function handleRecipeSelection(selectElement) {
+        const selectedOption = $(selectElement).find('option:selected');
+        const price = selectedOption.data('price');
+        const priceInput = $(selectElement).closest('.order-item').find('.price-input');
+        
+        if (price) {
+            priceInput.val(price.toFixed(2));
+        } else {
+            priceInput.val('');
+        }
+        
+        updateTotalAmount();
+    }
+
+    function filterRecipes() {
+        const selectedCategories = $('#categoryFilter').val();
+        const selectedIngredients = $('#ingredientFilter').val();
+
+        $('.recipe-select').each(function () {
+            const selectedValue = $(this).val();
+            $(this).find('option:not(:first)').remove();
+            const filteredRecipes = recipes.filter(recipe =>
+                (!selectedCategories.length || recipe.categoryIds.some(c => selectedCategories.includes(c.toString()))) &&
+                (!selectedIngredients.length || recipe.recipeIngredients.some(ri => selectedIngredients.includes(ri.ingredientId.toString())))
+            );
+            filteredRecipes.forEach(recipe => {
+                $(this).append(`<option value="${recipe.id}" data-price="${recipe.price}">${recipe.name}</option>`);
+            });
+            $(this).val(selectedValue);
+        });
+    }
+
+    // Event handlers
+    $('#addOrderItem').click(addOrderItem);
+
+    $(document).on('click', '.remove-item', function () {
+        $(this).closest('.order-item').fadeOut(300, function () {
+            $(this).remove();
+            updateTotalAmount();
+        });
+    });
+
+    // Update price when recipe is selected
+    $(document).on('change', '.recipe-select', function() {
+        handleRecipeSelection(this);
+    });
+
+    $(document).on('input', '.quantity-input', function() {
+        updateTotalAmount();
+    });
+
+    $('#categoryFilter, #ingredientFilter').on('change', filterRecipes);
+
+    $('#createOrderForm').submit(function (e) {
+        if ($('.order-item').length === 0) {
+            e.preventDefault();
+            alert('Please add at least one order item');
+        }
+    });
+
+    initializeSelect2();
+    addOrderItem(); // Add initial order item
+});
+    </script>
+}

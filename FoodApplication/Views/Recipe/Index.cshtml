@@ -1,0 +1,385 @@
+﻿@using FoodApplication.DAL.Extend
+@using Microsoft.AspNetCore.Identity
+@{
+    ViewData["Title"] = "Recipes List";
+    Layout = "~/Views/Layout/_Layout.cshtml";
+}
+@model IEnumerable<RecipeDTO>
+
+@inject UserManager<ApplicationUser> UserManager
+
+    <style>
+        .recipe-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            padding: 2rem 0;
+        }
+
+        .recipe-card {
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .recipe-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .recipe-image-wrapper {
+            position: relative;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            overflow: hidden;
+        }
+
+        .recipe-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .recipe-card:hover .recipe-image {
+            transform: scale(1.05);
+        }
+
+        .recipe-content {
+            padding: 1.5rem;
+        }
+
+        .recipe-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .recipe-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin: 0;
+        }
+
+        .recipe-price {
+            background: #4CAF50;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transform: rotate(2deg);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .recipe-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .recipe-author {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .recipe-date {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .recipe-description {
+            color: #4a5568;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .recipe-categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .category-badge {
+            background: #E3F2FD;
+            color: #1976D2;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .category-badge:hover {
+            background: #1976D2;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .recipe-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .recipe-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .favorite-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .favorite-btn {
+            background: none;
+            border: none;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            position: relative;
+        }
+
+        .favorite-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .favorite-btn i {
+            font-size: 1.5rem;
+            color: #dc3545;
+        }
+
+        .favorite-count {
+            background: #f8f9fa;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            color: #495057;
+            font-weight: 600;
+            min-width: 2.5rem;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .favorite-btn.favorited i {
+            animation: heartBeat 0.3s ease-in-out;
+        }
+    </style>
+
+<div class="content-wrapper">
+    <section class="content" id="recipes">
+        <div class="container">
+            <div class="row justify-content-center mb-5">
+                <div class="col-lg-8 text-center">
+                    <h2 class="fw-bold mb-4">Our Recipe Collection</h2>
+                    <p class="lead mb-4">Find your next culinary inspiration from our handpicked selection</p>
+                    <a asp-action="Create" class="btn btn-primary btn-lg px-4 py-2 rounded-pill">
+                        <i class="fas fa-plus-circle me-2"></i>Create New Recipe
+                    </a>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-lg-12">
+                    <div class="card shadow-sm border-0 rounded-3">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Filter Recipes</h5>
+                            <div class="mb-3">
+                                <label for="categoryFilter" class="form-label">Category</label>
+                                <select id="categoryFilter" class="form-select">
+                                    <option value="">All Categories</option>
+                                    @foreach (var category in ViewBag.Categories)
+                                    {
+                                        <option value="@category.Id">@category.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="searchFilter" class="form-label">Search</label>
+                                <div class="input-group">
+                                    <input type="text" id="searchFilter" class="form-control" placeholder="Search recipes...">
+                                    <button class="btn btn-primary" type="button" id="searchButton">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recipe-grid">
+                @foreach (var item in Model)
+                {
+                    <div class="recipe-card" data-categories="@string.Join(",", item.CategoryNames)">
+                        <div class="recipe-image-wrapper">
+                            <img src="@Url.Content(item.ImageUrl)" class="recipe-image" alt="@item.Name">
+                        </div>
+                        <div class="recipe-content">
+                            <div class="recipe-header">
+                                <h3 class="recipe-title">@item.Name</h3>
+                                <span class="recipe-price">@item.Price.ToString("C2")</span>
+                            </div>
+                    
+                            <div class="recipe-meta">
+                                <span class="recipe-author">
+                                    <i class="fas fa-user"></i>
+                                    @item.CreatedByUserName
+                                </span>
+                                <span class="recipe-date">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    @(item.CreatedAt?.ToShortDateString() ?? "N/A")
+                                </span>
+                            </div>
+
+                            <p class="recipe-description">
+                                @(item.Description?.Length > 100 ? item.Description.Substring(0, 100) + "..." : item.Description)
+                            </p>
+
+                            <div class="recipe-categories">
+                                @foreach (var categoryName in item.CategoryNames?.Take(3) ?? Enumerable.Empty<string>())
+                                {
+                                    <span class="category-badge">@categoryName</span>
+                                }
+                                @if ((item.CategoryNames?.Count ?? 0) > 3)
+                                {
+                                    <span class="category-badge">+@(item.CategoryNames.Count - 3) more</span>
+                                }
+                            </div>
+
+                            <div class="recipe-footer">
+                                <div class="recipe-actions">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="action-btn btn btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                        View
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="action-btn btn btn-outline-secondary">
+                                        <i class="fas fa-edit"></i>
+                                        Edit
+                                    </a>
+                                </div>
+                        
+                                <div class="favorite-wrapper">
+                                    <button class="favorite-btn @(item.FavoriteByUserIds.Contains(ViewBag.CurrentUserId) ? "favorited" : "")"
+                                            data-recipe-id="@item.Id">
+                                        <i class="@(item.FavoriteByUserIds.Contains(ViewBag.CurrentUserId) ? "fas" : "far") fa-heart"></i>
+                                    </button>
+                                    <span class="favorite-count" data-recipe-id="@item.Id">
+                                        @item.FavoriteCount
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+    </div>
+
+        </div>
+    </section>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            function filterRecipes() {
+                var selectedCategory = $('#categoryFilter').val();
+                var searchTerm = $('#searchFilter').val().toLowerCase();
+
+                $('.recipe-card').each(function () {
+                    var $card = $(this);
+                    var cardCategories = $card.data('categories').toLowerCase().split(',');
+                    var cardText = $card.text().toLowerCase();
+                    var categoryMatch = selectedCategory === "" || cardCategories.includes(selectedCategory.toLowerCase());
+                    var searchMatch = cardText.includes(searchTerm);
+
+                    $card.toggle(categoryMatch && searchMatch);
+                });
+            }
+
+            $('#categoryFilter, #searchFilter').on('change input', filterRecipes);
+            $('#searchButton').on('click', filterRecipes);
+
+            $('.category-badge').on('click', function () {
+                var category = $(this).text();
+                $('#categoryFilter').val(category).trigger('change');
+            });
+
+            // Smooth scroll to recipes section
+            $('a[href="#recipes"]').on('click', function (event) {
+                if (this.hash !== "") {
+                    event.preventDefault();
+                    var hash = this.hash;
+                    $('html, body').animate({
+                        scrollTop: $(hash).offset().top
+                    }, 800, function () {
+                        window.location.hash = hash;
+                    });
+                }
+            });
+
+            $('.favorite-btn').on('click', function () {
+                var recipeId = $(this).data('recipe-id');
+                var $btn = $(this);
+
+                $.ajax({
+                    url: '/Recipe/ToggleFavorite',
+                    type: 'POST',
+                    data: { recipeId: recipeId },
+                    headers: {
+                        "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            $btn.toggleClass('favorited');
+                            var $icon = $btn.find('i');
+                            var $count = $('.favorite-count[data-recipe-id="' + recipeId + '"]');
+
+                            if (response.isFavorited) {
+                                $icon.removeClass('far').addClass('fas');
+                            } else {
+                                $icon.removeClass('fas').addClass('far');
+                            }
+                            $count.text(response.favoriteCount);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}
+
+

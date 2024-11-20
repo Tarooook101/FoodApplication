@@ -1,0 +1,58 @@
+﻿@model FoodApplication.BLL.Models.CategoryDTO
+
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Layout/_Layout.cshtml";
+}
+
+
+
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+
+
+
+
+                        <div class="container mt-4">
+                            <h1>Edit Category</h1>
+
+                            <form asp-action="Edit">
+                                <input type="hidden" asp-for="Id" />
+                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Name" class="form-label">Category Name</label>
+                                    <input asp-for="Name" class="form-control" placeholder="Update category name" />
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <input type="submit" value="Save" class="btn btn-primary" />
+                                    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                                </div>
+                            </form>
+                        </div>
+
+                        
+
+
+
+
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

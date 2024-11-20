@@ -1,0 +1,305 @@
+﻿@using FoodApplication.DAL.Extend
+@using Microsoft.AspNetCore.Identity
+@{
+    ViewData["Title"] = "Recipe Details";
+    Layout = "~/Views/Layout/_Layout.cshtml";
+}
+@model FoodApplication.BLL.Models.RecipeDTO
+@inject UserManager<ApplicationUser> UserManager
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.7.2/font/bootstrap-icons.min.css" rel="stylesheet">
+<style>
+    body {
+        background-color: #f8f9fa;
+        color: #333;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .recipe-card {
+        background-color: #fff;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease-in-out;
+    }
+
+        .recipe-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .recipe-image-container {
+        position: relative;
+        height: 400px;
+        overflow: hidden;
+    }
+
+    .recipe-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .recipe-card:hover .recipe-image {
+        transform: scale(1.05);
+    }
+
+    .recipe-title {
+        background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+        padding: 30px;
+    }
+
+        .recipe-title h1 {
+            color: #fff;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            font-size: 2.5rem;
+        }
+
+    .recipe-meta {
+        font-size: 1rem;
+        color: #e0e0e0;
+    }
+
+    .section-title {
+        color: #007bff;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #007bff;
+    }
+
+    .ingredient-list {
+        list-style-type: none;
+        padding-left: 0;
+    }
+
+    .ingredient-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #e9ecef;
+        transition: background-color 0.3s ease;
+    }
+
+        .ingredient-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .ingredient-item:last-child {
+            border-bottom: none;
+        }
+
+    .category-badge {
+        font-size: 0.9rem;
+        font-weight: 500;
+        padding: 0.5em 1.2em;
+        border-radius: 50px;
+        background-color: #6c757d;
+        color: #fff;
+        transition: all 0.3s ease;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+        display: inline-block;
+    }
+
+        .category-badge:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+        }
+
+    .instructions-card {
+        background-color: #f8f9fa;
+        border-left: 4px solid #007bff;
+        border-radius: 10px;
+        padding: 1.5rem;
+    }
+
+    .action-buttons .btn {
+        transition: all 0.3s ease;
+        border-radius: 50px;
+        padding: 0.5rem 1.5rem;
+    }
+
+        .action-buttons .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+    .favorite-count {
+        font-size: 1rem;
+        color: #6c757d;
+    }
+
+    .favorite-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background-color: rgba(255, 255, 255, 0.8);
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+
+        .favorite-btn:hover {
+            background-color: #fff;
+            transform: scale(1.1);
+        }
+
+        .favorite-btn i {
+            font-size: 1.5rem;
+            color: #dc3545;
+        }
+</style>
+
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+
+
+
+
+                    <div class="container py-5">
+                        <div class="row justify-content-center">
+                            <div class="col-lg-10">
+                                <div class="recipe-card">
+                                    <div class="recipe-image-container">
+                                        <div class="recipe-image-container">
+                                            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                                            {
+                                                <img src="@Model.ImageUrl" class="recipe-image" alt="@Model.Name">
+                                            }
+                                            else
+                                            {
+                                                <img src="/images/tacos.jpg" class="recipe-image" alt="Default Recipe Image">
+                                            }
+                                        </div>
+                                        <button class="favorite-btn" title="Add to favorites" data-recipe-id="@Model.Id">
+                                            <i class="@(Model.FavoriteByUserIds.Contains(UserManager.GetUserId(User)) ? "fas" : "far") fa-heart"></i>
+                                        </button>
+                                        <div class="position-absolute bottom-0 start-0 w-100 recipe-title">
+                                            <h1 class="mb-2">@Model.Name</h1>
+                                            <p class="recipe-meta mb-0">
+                                                <i class="bi bi-person-circle me-2"></i>@Model.CreatedByUserName
+                                                <span class="ms-3"><i class="bi bi-calendar-event me-2"></i>@(Model.CreatedAt?.ToShortDateString() ?? "N/A")</span>
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="card-body p-4 p-md-5">
+                                        <div class="mb-5">
+                                            <h4 class="section-title">Description</h4>
+                                            <p class="lead">@Model.Description</p>
+                                        </div>
+
+                                        <div class="row mb-5">
+                                            <div class="col-md-6 mb-4 mb-md-0">
+                                                <h4 class="section-title">Ingredients</h4>
+                                                <ul class="ingredient-list">
+                                                    @foreach (var ingredient in Model.RecipeIngredients)
+                                                    {
+                                                        <li class="ingredient-item">
+                                                            <span>@ingredient.IngredientName</span>
+                                                            <span class="badge bg-primary rounded-pill">@ingredient.Quantity</span>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h4 class="section-title">Categories</h4>
+                                                <div>
+                                                    @foreach (var categoryName in Model.CategoryNames)
+                                                    {
+                                                        <span class="category-badge">@categoryName</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-5">
+                                            <h4 class="section-title">Instructions</h4>
+                                            <div class="instructions-card">
+                                                <p class="mb-0">@Model.Instructions</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between align-items-center mt-5 action-buttons">
+                                            <div>
+                                                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary me-2">
+                                                    <i class="bi bi-pencil-square"></i> Edit
+                                                </a>
+                                                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger me-2">
+                                                    <i class="bi bi-trash"></i> Delete
+                                                </a>
+                                            </div>
+                                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                                <i class="bi bi-arrow-left"></i> Back to List
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <div class="card-footer bg-white border-top-0 text-center py-3">
+                                        <p class="favorite-count mb-0">
+                                        <i class="bi bi-heart-fill text-danger me-2"></i> Favorited by <span id="favoriteCount">@Model.FavoriteCount</span> users
+                                    </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+</div>
+
+
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.favorite-btn').on('click', function () {
+                var recipeId = $(this).data('recipe-id');
+                var $btn = $(this);
+
+                $.ajax({
+                    url: '/Recipe/ToggleFavorite',
+                    type: 'POST',
+                    data: { recipeId: recipeId },
+                    headers: {
+                        "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            var $icon = $btn.find('i');
+                            if (response.isFavorited) {
+                                $icon.removeClass('far').addClass('fas');
+                            } else {
+                                $icon.removeClass('fas').addClass('far');
+                            }
+                            $('#favoriteCount').text(response.favoriteCount);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}

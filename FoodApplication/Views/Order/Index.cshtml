@@ -1,0 +1,271 @@
+﻿@using FoodApplication.DAL.Entities
+@model IEnumerable<FoodApplication.BLL.Models.OrderDTO>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Layout/_Layout.cshtml";
+}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<style>
+    :root {
+        --primary-color: #0056b3;
+        --secondary-color: #6c757d;
+        --success-color: #28a745;
+        --info-color: #17a2b8;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --light-color: #f8f9fa;
+        --dark-color: #343a40;
+    }
+
+    body {
+        background-color: var(--light-color);
+        color: var(--dark-color);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .page-title {
+        color: var(--primary-color);
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--primary-color);
+    }
+
+    .order-table {
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+        .order-table th {
+            background-color: var(--primary-color);
+            color: var(--light-color);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .order-table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+            .order-table tbody tr:hover {
+                background-color: rgba(0, 86, 179, 0.1);
+                transform: translateY(-2px);
+            }
+
+    .status-badge {
+        font-weight: 500;
+        padding: 0.5em 0.8em;
+        border-radius: 20px;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+    }
+
+    .status-pending {
+        background-color: var(--warning-color);
+        color: var(--dark-color);
+    }
+
+    .status-processing {
+        background-color: var(--info-color);
+        color: var(--light-color);
+    }
+
+    .status-completed {
+        background-color: var(--success-color);
+        color: var(--light-color);
+    }
+
+    .status-cancelled {
+        background-color: var(--danger-color);
+        color: var(--light-color);
+    }
+
+    .btn-create {
+        background-color: var(--success-color);
+        border: none;
+        padding: 0.5rem 1rem;
+        transition: all 0.3s ease;
+    }
+
+        .btn-create:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+    .btn-view, .btn-edit, .btn-delete {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        border-radius: 0.2rem;
+        transition: all 0.2s ease;
+    }
+
+        .btn-view:hover, .btn-edit:hover, .btn-delete:hover {
+            transform: translateY(-1px);
+        }
+
+    .search-bar {
+        max-width: 300px;
+    }
+
+    .table-responsive {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .pagination {
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .pagination .page-link {
+            color: var(--primary-color);
+        }
+
+    .no-orders {
+        text-align: center;
+        padding: 2rem;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        margin-top: 2rem;
+    }
+</style>
+
+
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+
+
+                <div class="container">
+                    <h1 class="page-title text-center mb-4">Order Management</h1>
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <a asp-action="Create" class="btn btn-success btn-create">
+                            <i class="fas fa-plus-circle me-2"></i>Create New Order
+                        </a>
+                        <div class="input-group search-bar">
+                            <input type="text" class="form-control" placeholder="Search orders..." id="searchInput">
+                            <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover order-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col"><i class="fas fa-hashtag me-2"></i>Order ID</th>
+                                        <th scope="col"><i class="fas fa-user me-2"></i>User</th>
+                                        <th scope="col"><i class="fas fa-calendar-alt me-2"></i>Order Date</th>
+                                        <th scope="col"><i class="fas fa-dollar-sign me-2"></i>Total Amount</th>
+                                        <th scope="col"><i class="fas fa-info-circle me-2"></i>Status</th>
+                                        <th scope="col"><i class="fas fa-cogs me-2"></i>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td>@item.Id</td>
+                                            <td>@item.UserId</td>
+                                            <td>@item.OrderDate.ToShortDateString()</td>
+                                            <td>@item.TotalAmount.ToString("C")</td>
+                                            <td>
+                                                @{
+                                                    var statusClass = item.Status switch
+                                                    {
+                                                        OrderStatus.Pending => "status-pending",
+                                                        OrderStatus.Processing => "status-processing",
+                                                        OrderStatus.Completed => "status-completed",
+                                                        OrderStatus.Cancelled => "status-cancelled",
+                                                        _ => ""
+                                                    };
+                                                }
+                                                <span class="status-badge @statusClass">@item.Status</span>
+                                            </td>
+                                            <td>
+                                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-view">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-delete">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        
+                    }
+                    else
+                    {
+                        <div class="no-orders">
+                            <h3>No orders found</h3>
+                            <p>There are currently no orders in the system. Click the "Create New Order" button to add one.</p>
+                        </div>
+                    }
+                </div>
+
+
+
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const tableRows = document.querySelectorAll('.order-table tbody tr');
+
+        function performSearch() {
+            const searchTerm = searchInput.value.toLowerCase();
+            tableRows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        }
+
+        searchButton.addEventListener('click', performSearch);
+        searchInput.addEventListener('keyup', function (event) {
+            if (event.key === 'Enter') {
+                performSearch();
+            }
+        });
+    });
+</script>

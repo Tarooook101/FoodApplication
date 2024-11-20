@@ -1,0 +1,533 @@
+﻿@using FoodApplication.DAL.Entities
+@using FoodApplication.Web.Models
+
+@model UserProfileViewModel
+
+@{
+    ViewData["Title"] = "User Profile";
+    Layout = "~/Views/Layout/_Layout.cshtml";
+}
+
+<style>
+    /* Modern Profile Styles */
+    :root {
+        --primary-color: #2563eb;
+        --primary-light: #3b82f6;
+        --primary-dark: #1d4ed8;
+        --secondary-color: #64748b;
+        --success-color: #22c55e;
+        --warning-color: #f59e0b;
+        --danger-color: #ef4444;
+    }
+
+    .profile-wrapper {
+        background-color: #f8fafc;
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .profile-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        padding: 3rem 0;
+        margin-bottom: 3rem;
+        color: white;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .profile-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+    .profile-avatar-wrapper {
+        position: relative;
+        width: 180px;
+        height: 180px;
+        margin: 0 auto;
+    }
+
+    .profile-avatar {
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        border: 5px solid white;
+        box-shadow: 0 0 25px rgba(0, 0, 0, 0.2);
+        object-fit: cover;
+        background-color: #fff;
+    }
+
+    .avatar-upload {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background: var(--primary-color);
+        border-radius: 50%;
+        padding: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+        .avatar-upload:hover {
+            background: var(--primary-dark);
+            transform: scale(1.1);
+        }
+
+    .stats-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+    .stats-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: var(--primary-color);
+    }
+
+    .recipe-card {
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        border: none;
+        background: white;
+    }
+
+        .recipe-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+    .recipe-image {
+        height: 220px;
+        object-fit: cover;
+    }
+
+    .custom-tabs {
+        border-bottom: 2px solid #e2e8f0;
+        margin-bottom: 2rem;
+    }
+
+        .custom-tabs .nav-link {
+            color: var(--secondary-color);
+            border: none;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+            .custom-tabs .nav-link::after {
+                content: '';
+                position: absolute;
+                bottom: -2px;
+                left: 0;
+                width: 100%;
+                height: 3px;
+                background-color: var(--primary-color);
+                transform: scaleX(0);
+                transition: transform 0.3s ease;
+            }
+
+            .custom-tabs .nav-link.active {
+                color: var(--primary-color);
+                background: none;
+            }
+
+                .custom-tabs .nav-link.active::after {
+                    transform: scaleX(1);
+                }
+
+    .badge-role {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 0.5rem 1.2rem;
+        border-radius: 20px;
+        font-weight: 500;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .order-status {
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .status-completed {
+        background-color: rgba(34, 197, 94, 0.1);
+        color: var(--success-color);
+    }
+
+    .status-processing {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: var(--warning-color);
+    }
+
+    .status-cancelled {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: var(--danger-color);
+    }
+
+
+    .order-details-row.show {
+        display: table-row !important;
+    }
+</style>
+
+
+
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+
+
+
+                <div class="profile-wrapper">
+                    <div class="profile-header">
+                        <div class="container">
+                            <div class="row align-items-center">
+                                <div class="col-md-3 text-center">
+                                    <div class="profile-avatar-wrapper">
+                                        <img src="@(string.IsNullOrEmpty(Model.ProfileImageUrl) ? "/images/default-avatar.jpg" : Model.ProfileImageUrl)"
+                                             alt="Profile Picture"
+                                             class="profile-avatar"
+                                             id="profileImage" />
+                                        <label for="imageUpload" class="avatar-upload">
+                                            <i class="fas fa-camera text-white"></i>
+                                        </label>
+                                        <form id="imageUploadForm" method="post" enctype="multipart/form-data" style="display: none;">
+                                            <input type="file"
+                                                   id="imageUpload"
+                                                   name="profileImage"
+                                                   accept="image/*"
+                                                   onchange="uploadImage(this)" />
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <h1 class="display-4 fw-bold mb-3">@Model.UserName</h1>
+                                    <p class="lead mb-4">@Model.Email</p>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @foreach (var role in Model.Roles)
+                                        {
+                                            <span class="badge-role">@role</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="container">
+                        <!-- Statistics Cards -->
+                        <div class="row mb-5">
+                            <div class="col-md-4">
+                                <div class="stats-card text-center">
+                                    <div class="stats-icon">
+                                        <i class="fas fa-utensils"></i>
+                                    </div>
+                                    <h3 class="display-4 fw-bold text-primary">@Model.CreatedRecipes</h3>
+                                    <p class="text-secondary mb-0">Created Recipes</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stats-card text-center">
+                                    <div class="stats-icon">
+                                        <i class="fas fa-heart"></i>
+                                    </div>
+                                    <h3 class="display-4 fw-bold text-primary">@Model.FavoriteRecipes</h3>
+                                    <p class="text-secondary mb-0">Favorite Recipes</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stats-card text-center">
+                                    <div class="stats-icon">
+                                        <i class="fas fa-shopping-bag"></i>
+                                    </div>
+                                    <h3 class="display-4 fw-bold text-primary">@Model.TotalOrders</h3>
+                                    <p class="text-secondary mb-0">Total Orders</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tabs -->
+                        <ul class="nav custom-tabs" id="profileTabs" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="recipes-tab" data-bs-toggle="tab" href="#recipes">
+                                    <i class="fas fa-book-open me-2"></i>My Recipes
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="favorites-tab" data-bs-toggle="tab" href="#favorites">
+                                    <i class="fas fa-heart me-2"></i>Favorites
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="orders-tab" data-bs-toggle="tab" href="#orders">
+                                    <i class="fas fa-shopping-cart me-2"></i>Order History
+                                </a>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content" id="profileTabsContent">
+                            <!-- My Recipes Tab -->
+                            <div class="tab-pane fade show active" id="recipes">
+                                <div class="row">
+                                    @foreach (var recipe in Model.CreatedRecipesList)
+                                    {
+                                        <div class="col-md-4">
+                                            <div class="recipe-card">
+                                                <img src="@recipe.ImageUrl" class="recipe-image w-100" alt="@recipe.Name">
+                                                <div class="card-body p-4">
+                                                    <h5 class="card-title fw-bold mb-3">@recipe.Name</h5>
+                                                    <p class="card-text text-secondary">
+                                                        @(recipe.Description?.Length > 100
+                                                            ? recipe.Description.Substring(0, 100) + "..."
+                                                            : recipe.Description)
+                                                    </p>
+                                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                                        <span class="text-primary">
+                                                            <i class="fas fa-heart"></i> @recipe.FavoriteCount
+                                                        </span>
+                                                        <a href="@Url.Action("Details", "Recipe", new { id = recipe.Id })"
+                                                           class="btn btn-outline-primary">
+                                                            View Recipe
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Favorites Tab -->
+                            <div class="tab-pane fade" id="favorites">
+                                <div class="row">
+                                    @foreach (var recipe in Model.FavoriteRecipesList)
+                                    {
+                                        <div class="col-md-4">
+                                            <div class="recipe-card">
+                                                <img src="@recipe.ImageUrl" class="recipe-image w-100" alt="@recipe.Name">
+                                                <div class="card-body p-4">
+                                                    <h5 class="card-title fw-bold mb-3">@recipe.Name</h5>
+                                                    <p class="card-text text-secondary">
+                                                        @(recipe.Description?.Length > 100
+                                                            ? recipe.Description.Substring(0, 100) + "..."
+                                                            : recipe.Description)
+                                                    </p>
+                                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                                        <span class="text-secondary">
+                                                            <i class="fas fa-user me-1"></i> @recipe.CreatedByUserName
+                                                        </span>
+                                                        <a href="@Url.Action("Details", "Recipe", new { id = recipe.Id })"
+                                                           class="btn btn-outline-primary">
+                                                            View Recipe
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Orders Tab -->
+                            <div class="tab-pane fade" id="orders">
+                                @if (!Model.OrderHistory.Any())
+                                {
+                                    <div class="text-center py-5">
+                                        <div class="mb-4">
+                                            <i class="fas fa-shopping-bag fa-4x text-muted"></i>
+                                        </div>
+                                        <h3 class="text-muted">No Orders Yet</h3>
+                                        <p class="text-muted">Start exploring our recipes and place your first order!</p>
+                                        <a href="@Url.Action("Index", "Recipe")" class="btn btn-primary">
+                                            Browse Recipes
+                                        </a>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="table-responsive">
+                                        <table class="table table-hover border">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Order ID</th>
+                                                    <th>Date</th>
+                                                    <th>Items</th>
+                                                    <th>Status</th>
+                                                    <th>Total Amount</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var order in Model.OrderHistory.OrderByDescending(o => o.OrderDate))
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            <span class="fw-bold">#@order.Id</span>
+                                                        </td>
+                                                        <td>
+                                                            <div>@order.OrderDate.ToShortDateString()</div>
+                                                            <small class="text-muted">@order.OrderDate.ToString("HH:mm")</small>
+                                                        </td>
+                                                        <td>
+                                                            <div class="d-flex align-items-center">
+                                                                <span class="badge bg-secondary">
+                                                                    @order.OrderItems.Count items
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            @{
+                                                                var (statusClass, statusIcon) = order.Status switch
+                                                                {
+                                                                    OrderStatus.Completed => ("bg-success", "fas fa-check-circle"),
+                                                                    OrderStatus.Processing => ("bg-warning", "fas fa-clock"),
+                                                                    OrderStatus.Cancelled => ("bg-danger", "fas fa-times-circle"),
+                                                                    _ => ("bg-info", "fas fa-info-circle")
+                                                                };
+                                                            }
+                                                            <span class="badge @statusClass">
+                                                                <i class="@statusIcon me-1"></i>
+                                                                @order.Status
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <div class="fw-bold">
+                                                                $@order.TotalAmount.ToString("F2")
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="btn-group">
+                                                                <a href="@Url.Action("Details", "Order", new { id = order.Id })"
+                                                                   class="btn btn-sm btn-outline-primary">
+                                                                    <i class="fas fa-eye me-1"></i> View
+                                                                </a>
+                                                                @if (order.Status == OrderStatus.Completed)
+                                                                {
+                                                                    <button class="btn btn-sm btn-outline-success"
+                                                                            onclick="reorderItems(@order.Id)">
+                                                                        <i class="fas fa-redo me-1"></i> Reorder
+                                                                    </button>
+                                                                }
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr class="order-details-row d-none" id="orderDetails-@order.Id">
+                                                        <td colspan="6">
+                                                            <div class="p-3 bg-light">
+                                                                <h6 class="mb-3">Order Items</h6>
+                                                                <div class="row">
+                                                                    @foreach (var item in order.OrderItems)
+                                                                    {
+                                                                        <div class="col-md-4 mb-2">
+                                                                            <div class="d-flex align-items-center">
+                                                                                <div class="me-2">
+                                                                                    <span class="badge bg-primary">x@item.Quantity</span>
+                                                                                </div>
+                                                                                <div>
+                                                                                    <div class="fw-bold">Recipe #@item.RecipeId</div>
+                                                                                    <div class="text-muted">$@item.Price.ToString("F2")</div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+</div>
+
+
+
+@section Scripts {
+    <script>
+        function reorderItems(orderId) {
+            // Implement reorder functionality
+            alert('Reorder functionality will be implemented for order #' + orderId);
+        }
+
+        function toggleOrderDetails(orderId) {
+            const detailsRow = document.getElementById(`orderDetails-${orderId}`);
+            detailsRow.classList.toggle('d-none');
+        }
+
+        function uploadImage(input) {
+            if (input.files && input.files[0]) {
+                const formData = new FormData();
+                formData.append('profileImage', input.files[0]);
+
+                fetch('/Profile/UpdateProfileImage', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            document.getElementById('profileImage').src = data.imageUrl;
+                        } else {
+                            alert('Failed to upload image: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to upload image');
+                    });
+            }
+        }
+
+        // Initialize Bootstrap tabs
+        document.addEventListener('DOMContentLoaded', function () {
+            var triggerTabList = [].slice.call(document.querySelectorAll('#profileTabs a'))
+            triggerTabList.forEach(function (triggerEl) {
+                var tabTrigger = new bootstrap.Tab(triggerEl)
+                triggerEl.addEventListener('click', function (event) {
+                    event.preventDefault()
+                    tabTrigger.show()
+                })
+            })
+        });
+    </script>
+}

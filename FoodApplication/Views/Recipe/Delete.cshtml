@@ -1,0 +1,199 @@
+﻿
+@{
+    ViewData["Title"] = "Delete Recipes";
+    Layout = "~/Views/Layout/_Layout.cshtml";
+}
+@model FoodApplication.BLL.Models.RecipeDTO
+
+
+
+<style>
+    .delete-recipe-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .recipe-image {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        border: 3px solid #f8f9fa;
+    }
+
+    .delete-warning {
+        background-color: #fff5f5;
+        border-left: 4px solid #dc3545;
+        padding: 1rem;
+        margin: 1.5rem 0;
+        border-radius: 0 8px 8px 0;
+    }
+
+    .recipe-details {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+    }
+
+    .detail-item {
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .detail-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .btn-delete {
+        background-color: #dc3545;
+        border: none;
+        padding: 0.8rem 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-delete:hover {
+        background-color: #c82333;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-cancel {
+        background-color: #6c757d;
+        border: none;
+        padding: 0.8rem 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-cancel:hover {
+        background-color: #5a6268;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    }
+
+    .badge-category {
+        background-color: #17a2b8;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+        display: inline-block;
+    }
+
+    .ingredients-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .ingredients-list li {
+        padding: 0.5rem 0;
+        border-bottom: 1px dashed #dee2e6;
+    }
+
+    .ingredients-list li:last-child {
+        border-bottom: none;
+    }
+
+    .delete-header {
+        position: relative;
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid #dc3545;
+    }
+
+    .delete-header::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 50px;
+        height: 2px;
+        background-color: #dc3545;
+    }
+</style>
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+
+
+                <div class="delete-recipe-container">
+                    <div class="delete-header">
+                        <h2 class="text-danger mb-0">Delete Recipe</h2>
+                    </div>
+
+                    <div class="delete-warning">
+                        <h5 class="text-danger mb-2">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Warning
+                        </h5>
+                        <p class="mb-0">Are you sure you want to delete this recipe? This action cannot be undone.</p>
+                    </div>
+
+                    <img src="@Model.ImageUrl" alt="@Model.Name" class="recipe-image" onerror="this.src='/images/default-recipe.jpg';" />
+
+                    <div class="recipe-details">
+                        <div class="detail-item">
+                            <h4 class="text-primary mb-3">@Model.Name</h4>
+                            <p class="text-muted mb-0">@Model.Description</p>
+                        </div>
+
+                        <div class="detail-item">
+                            <h5 class="mb-3">Categories</h5>
+                            @foreach (var category in Model.CategoryNames)
+                            {
+                                <span class="badge-category">@category</span>
+                            }
+                        </div>
+
+                        <div class="detail-item">
+                            <h5 class="mb-3">Ingredients</h5>
+                            <ul class="ingredients-list">
+                                @foreach (var ingredient in Model.RecipeIngredients)
+                                {
+                                    <li>
+                                        <i class="fas fa-utensils me-2"></i>
+                                        @ingredient.IngredientName - @ingredient.Quantity
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+
+                        <div class="detail-item">
+                            <p><strong>Created by:</strong> @Model.CreatedByUserName</p>
+                            <p><strong>Created at:</strong> @Model.CreatedAt?.ToString("MMMM dd, yyyy")</p>
+                            <p><strong>Price:</strong> @Model.Price.ToString("C2")</p>
+                        </div>
+                    </div>
+
+                    <form asp-action="Delete" method="post" class="mt-4">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-flex justify-content-end gap-3">
+                            <a asp-action="Index" class="btn btn-cancel text-white">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-delete text-white">
+                                <i class="fas fa-trash-alt me-2"></i>Delete Recipe
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+</div>

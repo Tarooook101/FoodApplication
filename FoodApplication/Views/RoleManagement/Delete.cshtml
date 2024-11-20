@@ -1,0 +1,72 @@
+﻿@{
+    ViewData["Title"] = "Delete Role";
+}
+
+<style>
+    .modal-content {
+        border-radius: 10px;
+    }
+
+    .modal-header {
+        background-color: #f8f9fa;
+        border-bottom: none;
+    }
+
+    .modal-footer {
+        border-top: none;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+</style>
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+
+                <div class="modal fade" id="deleteRoleModal" tabindex="-1" aria-labelledby="deleteRoleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="deleteRoleModalLabel">Confirm Delete</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Are you sure you want to delete this role?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <form id="deleteRoleForm" asp-action="Delete" method="post">
+                                    <input type="hidden" id="roleIdToDelete" name="id" />
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+</div>
+
+
+<script>
+    function openDeleteModal(roleId) {
+        document.getElementById('roleIdToDelete').value = roleId;
+        var modal = new bootstrap.Modal(document.getElementById('deleteRoleModal'));
+        modal.show();
+    }
+</script>

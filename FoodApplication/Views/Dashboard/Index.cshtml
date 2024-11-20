@@ -1,0 +1,260 @@
+﻿@using FoodApplication.DAL.Entities
+@using FoodApplication.Web.Models;
+@model DashboardViewModel
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<style>
+    .stat-card {
+        border-radius: 15px;
+        transition: transform 0.3s;
+        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+    .stat-icon {
+        font-size: 2.5rem;
+        opacity: 0.8;
+    }
+
+    .progress-bar-custom {
+        height: 8px;
+        border-radius: 4px;
+    }
+
+    .chart-container {
+        height: 300px;
+        margin: 20px 0;
+    }
+
+    .activity-timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+
+        .activity-timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            height: 100%;
+            width: 2px;
+            background: #e9ecef;
+        }
+
+    .timeline-item {
+        position: relative;
+        padding-bottom: 1.5rem;
+    }
+
+    .timeline-dot {
+        position: absolute;
+        left: -30px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #007bff;
+        top: 5px;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+    }
+</style>
+<div class="content-wrapper p-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Dashboard Overview</h1>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <a asp-controller="Recipe" asp-action="Index" class="text-decoration-none">
+                <div class="stat-card card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="flex-shrink-0 me-3">
+                                <i class="fas fa-utensils stat-icon text-primary"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Total Recipes</h6>
+                                <h2 class="mb-0">@Model.TotalRecipes</h2>
+                            </div>
+                        </div>
+                        <div class="progress progress-bar-custom">
+                            <div class="progress-bar bg-primary" style="width: 75%"></div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <a asp-controller="Order" asp-action="Index" class="text-decoration-none">
+                <div class="stat-card card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="flex-shrink-0 me-3">
+                                <i class="fas fa-shopping-cart stat-icon text-success"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Total Orders</h6>
+                                <h2 class="mb-0">@Model.TotalOrders</h2>
+                            </div>
+                        </div>
+                        <div class="progress progress-bar-custom">
+                            <div class="progress-bar bg-success" style="width: 65%"></div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <a asp-controller="UserManagement" asp-action="Index" class="text-decoration-none">
+                <div class="stat-card card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="flex-shrink-0 me-3">
+                                <i class="fas fa-users stat-icon text-warning"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Total Users</h6>
+                                <h2 class="mb-0">@Model.TotalUsers</h2>
+                            </div>
+                        </div>
+                        <div class="progress progress-bar-custom">
+                            <div class="progress-bar bg-warning" style="width: 85%"></div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <a asp-controller="Category" asp-action="Index" class="text-decoration-none">
+                <div class="stat-card card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="flex-shrink-0 me-3">
+                                <i class="fas fa-tags stat-icon text-danger"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Categories</h6>
+                                <h2 class="mb-0">@Model.TotalCategories</h2>
+                            </div>
+                        </div>
+                        <div class="progress progress-bar-custom">
+                            <div class="progress-bar bg-danger" style="width: 55%"></div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Charts & Tables -->
+    <div class="row">
+        <!-- Recent Orders -->
+        <div class="col-12 col-xl-8 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Recent Orders</h5>
+                        <a href="/Order/Index" class="btn btn-sm btn-primary">View All</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var order in Model.RecentOrders)
+                                {
+                                    <tr>
+                                        <td>#@order.Id</td>
+                                        <td>@order.OrderDate.ToString("MMM dd, yyyy")</td>
+                                        <td>$@order.TotalAmount.ToString("F2")</td>
+                                        <td>
+                                            @{
+                                                var statusClass = order.Status switch
+                                                {
+                                                    OrderStatus.Completed => "bg-success",
+                                                    OrderStatus.Processing => "bg-warning",
+                                                    OrderStatus.Pending => "bg-info",
+                                                    _ => "bg-secondary"
+                                                };
+                                            }
+                                            <span class="status-badge @statusClass text-white">
+                                                @order.Status
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="/Order/Details/@order.Id" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Recipes -->
+        <div class="col-12 col-xl-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Popular Recipes</h5>
+                        <a href="/Recipe/Index" class="btn btn-sm btn-primary">View All</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="activity-timeline">
+                        @foreach (var recipe in Model.TopRecipes)
+                        {
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="mb-1">@recipe.Name</h6>
+                                        <small class="text-muted">by @recipe.CreatedByUserName</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge bg-primary">
+                                            <i class="fas fa-heart me-1"></i>
+                                            @recipe.FavoriteCount
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
